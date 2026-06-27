@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Book top-rated professional cleaners in minutes. Interactive pricing, real-time job tracking, and satisfaction guaranteed. SparkMate: Clean spaces, better places.">
+  <meta name="keywords" content="cleaning services, home cleaning, office cleaning, deep clean, book cleaner online, professional cleaners, real-time tracking, clean checklist">
+  <meta name="author" content="SparkMate Team">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://sparkmate.com/">
+  
+  <!-- OpenGraph Metadata -->
+  <meta property="og:title" content="SparkMate | Premium Residential & Commercial Cleaning Services">
+  <meta property="og:description" content="Book top-rated professional cleaners in minutes. Interactive pricing, real-time job tracking, and satisfaction guaranteed.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sparkmate.com/">
+  <meta property="og:image" content="https://sparkmate.com/assets/logo.jpg">
+  <meta property="og:site_name" content="SparkMate">
+  
+  <!-- Twitter Cards Metadata -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SparkMate | Premium Cleaning Services">
+  <meta name="twitter:description" content="Book professional cleaners in minutes with instant pricing and real-time tracking portals.">
+  <meta name="twitter:image" content="https://sparkmate.com/assets/logo.jpg">
+
+  <title>SparkMate | Premium Residential & Commercial Cleaning Services</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Public Landing Page Custom Styles */
+    .hero {
+      padding: 8rem 0 6rem;
+      background: radial-gradient(circle at top right, rgba(50, 140, 193, 0.1), transparent 50%),
+                  radial-gradient(circle at bottom left, rgba(125, 185, 60, 0.05), transparent 50%);
+      position: relative;
+    }
+    .hero-content {
+      max-width: 650px;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--primary-navy), var(--spark-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    [data-theme="dark"] .hero h1 {
+      background: linear-gradient(135deg, #ffffff, var(--spark-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+    }
+    .hero-badge-container {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .hero-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-secondary);
+      padding: 0.75rem 1.25rem;
+      border-radius: 50px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+    }
+    .hero-badge i {
+      color: #f59e0b;
+    }
+
+    /* Calculator Section */
+    .calc-box {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 2.5rem;
+      box-shadow: var(--card-shadow);
+    }
+    .slider-group {
+      margin-bottom: 2rem;
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .freq-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .freq-btn {
+      padding: 0.75rem;
+      border-radius: var(--border-radius-sm);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+    .freq-btn.active {
+      background: var(--spark-blue);
+      color: white;
+      border-color: var(--spark-blue);
+    }
+    .price-display {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(50, 140, 193, 0.05), rgba(125, 185, 60, 0.05));
+      border: 1px solid rgba(50, 140, 193, 0.1);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      margin-top: 1.5rem;
+    }
+    .price-value {
+      font-size: 3rem;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      color: var(--spark-blue);
+    }
+
+    /* Services List */
+    .services {
+      padding: 6rem 0;
+      background-color: var(--bg-tertiary);
+    }
+    .service-card {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    .service-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(50, 140, 193, 0.1);
+      color: var(--spark-blue);
+      font-size: 2rem;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Booking Wizard Modal */
+    .wizard-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .wizard-modal {
+      background: var(--bg-secondary);
+      width: 90%;
+      max-width: 650px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      animation: fadeIn 0.3s ease;
+    }
+    .wizard-header {
+      background: var(--primary-navy);
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .wizard-steps {
+      display: flex;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .wizard-step {
+      flex: 1;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-light);
+      position: relative;
+    }
+    .wizard-step.active {
+      color: var(--spark-blue);
+      background: var(--bg-secondary);
+    }
+    .wizard-body {
+      padding: 2.5rem;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .wizard-slide {
+      display: none;
+    }
+    .wizard-slide.active {
+      display: block;
+    }
+    .wizard-footer {
+      padding: 1.5rem 2.5rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+    }
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .option-card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-sm);
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-card.active {
+      border-color: var(--spark-blue);
+      background: rgba(50, 140, 193, 0.05);
+    }
+
+    /* FAQ accordion styles */
+    .faq-section {
+      padding: 6rem 0;
+    }
+    .faq-accordion {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 1.25rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-secondary);
+    }
+    .faq-answer {
+      padding: 0 1.5rem 1.25rem;
+      color: var(--text-secondary);
+      display: none;
+    }
+
+    /* Login Modal */
+    .login-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-modal {
+      background: var(--bg-secondary);
+      width: 90%;
+      max-width: 450px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    .demo-accounts {
+      background: var(--bg-tertiary);
+      border-radius: var(--border-radius-sm);
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+    .demo-btn {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      justify-content: space-between;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/main-BBEKTVA4.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/app-DaXCS0Su.js">
+  <link rel="stylesheet" crossorigin href="/assets/app-BbluD4jH.css">
+</head>
+<body>
+
+  <!-- Header Nav -->
+  <header>
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="/assets/logo-CKMnBTCN.jpg" alt="SparkMate Logo">
+        SparkMate
+      </a>
+      <button class="mobile-menu-btn" aria-label="Toggle Navigation menu"><i class="fa-solid fa-bars"></i></button>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#services" class="nav-link">Services</a></li>
+          <li><a href="#calculator" class="nav-link">Pricing</a></li>
+          <li><a href="#faq" class="nav-link">FAQ</a></li>
+          <li><a href="#contact" class="nav-link">Contact</a></li>
+          <li class="theme-switch-wrapper">
+            <i class="fa-regular fa-sun text-light"></i>
+            <label class="theme-switch" for="theme-toggle">
+              <input type="checkbox" id="theme-toggle">
+              <span class="slider"></span>
+            </label>
+            <i class="fa-regular fa-moon text-light"></i>
+          </li>
+          <li><button onclick="openLoginModal()" class="btn btn-secondary"><i class="fa-solid fa-right-to-bracket"></i> Login / Portal</button></li>
+          <li><button onclick="openBookingWizard()" class="btn btn-primary">Book Now</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container grid-2">
+      <div class="hero-content">
+        <h1>Clean Spaces.<br>Better Places.</h1>
+        <p>Premium professional cleaning services with instant booking, automated schedule manager, and real-time tracking portals for clients and staff. Rated 4.9/5 stars by businesses and homeowners.</p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button onclick="openBookingWizard()" class="btn btn-primary btn-lg"><i class="fa-solid fa-calendar-check"></i> Book in 60 Seconds</button>
+          <a href="#calculator" class="btn btn-secondary"><i class="fa-solid fa-calculator"></i> Calculate Estimate</a>
+        </div>
+        <div class="hero-badge-container">
+          <div class="hero-badge">
+            <i class="fa-solid fa-star"></i>
+            <span><strong>4.9/5</strong> rating (2k+ cleans)</span>
+          </div>
+          <div class="hero-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Fully Bonded & DBS Checked</span>
+          </div>
+        </div>
+      </div>
+      <!-- Hero Interactive Calculator -->
+      <div id="calculator" class="calc-box">
+        <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem;"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--spark-blue);"></i> Instant Quote Calculator</h3>
+        
+        <div class="slider-group">
+          <div class="slider-labels">
+            <label for="calc-size">Property Size</label>
+            <span id="size-val">1,200 sq ft</span>
+          </div>
+          <input type="range" id="calc-size" min="500" max="5000" step="100" value="1200">
+        </div>
+
+        <div class="slider-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <div class="slider-labels">
+              <label for="calc-beds">Bedrooms</label>
+              <span id="beds-val">2</span>
+            </div>
+            <input type="range" id="calc-beds" min="1" max="6" value="2">
+          </div>
+          <div>
+            <div class="slider-labels">
+              <label for="calc-baths">Bathrooms</label>
+              <span id="baths-val">2</span>
+            </div>
+            <input type="range" id="calc-baths" min="1" max="4" value="2">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem; font-weight: 600;">Frequency</div>
+        <div class="freq-buttons">
+          <button class="freq-btn active" data-freq="weekly">Weekly (20% off)</button>
+          <button class="freq-btn" data-freq="biweekly">Bi-weekly (15% off)</button>
+          <button class="freq-btn" data-freq="monthly">Monthly (10% off)</button>
+          <button class="freq-btn" data-freq="once">One-off</button>
+        </div>
+
+        <div style="margin-bottom: 1rem; font-weight: 600;">Service Type</div>
+        <div class="option-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="option-card active" data-type="standard">
+            <strong>Standard</strong>
+            <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">Daily/weekly maintenance</div>
+          </div>
+          <div class="option-card" data-type="deep">
+            <strong>Deep Clean</strong>
+            <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">Thorough scrubdown</div>
+          </div>
+          <div class="option-card" data-type="move">
+            <strong>Move In/Out</strong>
+            <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">End of tenancy spec</div>
+          </div>
+        </div>
+
+        <div class="price-display">
+          <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Estimated Price</span>
+          <div class="price-value" id="calc-price">$112.00 <span style="font-size: 1rem; font-weight: normal; color: var(--text-light);">/ clean</span></div>
+          <button onclick="bookWithCalculatorDetails()" class="btn btn-accent" style="width: 100%; margin-top: 1rem;"><i class="fa-solid fa-arrow-right"></i> Book This Clean Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Grid -->
+  <section id="services" class="services">
+    <div class="container">
+      <h2 class="section-title">Our Cleaning Services</h2>
+      <div class="grid-3">
+        <div class="card service-card">
+          <div class="service-icon"><i class="fa-solid fa-house-chimney"></i></div>
+          <h3>Standard Cleaning</h3>
+          <p style="margin: 1rem 0; color: var(--text-secondary);">Dusting, vacuuming, mopping, trash empty, kitchen counter wipe-down, bathroom sanitization. Perfect for keeping homes and offices neat weekly.</p>
+        </div>
+        <div class="card service-card">
+          <div class="service-icon"><i class="fa-solid fa-broom"></i></div>
+          <h3>Deep Cleaning</h3>
+          <p style="margin: 1rem 0; color: var(--text-secondary);">Detail cleaning including skirting boards, window frames, inside microwave, door handles, limescale removal, grout scrubbing, and mattress dusting.</p>
+        </div>
+        <div class="card service-card">
+          <div class="service-icon"><i class="fa-solid fa-truck-moving"></i></div>
+          <h3>Move-In / Move-Out</h3>
+          <p style="margin: 1rem 0; color: var(--text-secondary);">Comprehensive preparation clean for tenancy handovers. Includes inside oven, fridge, kitchen cupboards, drawers, window sills, and heavy steam vacuums.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="faq-section">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="faq-accordion">
+        <div class="faq-item">
+          <div class="faq-question"><span>How does the real-time checklist and GPS check-in work?</span> <i class="fa-solid fa-plus"></i></div>
+          <div class="faq-answer">Every cleaner is required to scan a QR code at your premises and clock in via GPS. They tick off checklist items room-by-room, upload before/after photos, and you receive real-time notifications in your client portal.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><span>What is your cancellation and rescheduling policy?</span> <i class="fa-solid fa-plus"></i></div>
+          <div class="faq-answer">Rescheduling is free up to 24 hours before your booking. Within 24 hours, a $30 late fee applies to cover staff travel bookings. Cancellations trigger refunds according to your site subscription tier.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><span>Are the cleaners insured and background-checked?</span> <i class="fa-solid fa-plus"></i></div>
+          <div class="faq-answer">Yes, 100% of SparkMate professionals undergo identity check verify, training courses, and criminal check validation. They are fully bonded and insured.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form -->
+  <section id="contact" style="padding: 6rem 0; background: var(--bg-tertiary);">
+    <div class="container" style="max-width: 600px;">
+      <h2 class="section-title">Get a Commercial Quote</h2>
+      <div class="card" style="padding: 2.5rem;">
+        <form id="commercial-quote-form" onsubmit="event.preventDefault(); alert('Quote request submitted! Our corporate account manager will contact you in 2 hours.'); this.reset();">
+          <div style="margin-bottom: 1.25rem;">
+            <label for="contact-name" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Full Name</label>
+            <input type="text" id="contact-name" placeholder="Aayush Kharel" required>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <label for="contact-email" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Email Address</label>
+            <input type="email" id="contact-email" placeholder="aayush@company.com" required>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <label for="contact-phone" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Phone Number</label>
+            <input type="tel" id="contact-phone" placeholder="+1 (555) 000-0000" required>
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <label for="contact-msg" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Brief Office/Property Details</label>
+            <textarea id="contact-msg" rows="4" placeholder="Describe layout, floor square footage, and cleaning frequency needed." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-paper-plane"></i> Send Inquiry</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <div class="footer-logo">
+          <img src="/assets/logo-CKMnBTCN.jpg" alt="SparkMate Footer Logo">
+          SparkMate
+        </div>
+        <p style="color: #94a3b8; font-size: 0.875rem;">Premium cleaning solutions synced to modern tracking systems. Eco-friendly cleaning done properly.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul style="margin-top: 1rem;">
+          <li><a href="#services">Services</a></li>
+          <li><a href="#calculator">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul style="margin-top: 1rem;">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Refund Rules</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <p style="margin-top: 1rem; font-size: 0.875rem; color: #cbd5e1;">Support Line: +1 (555) SPARK-ME</p>
+        <p style="font-size: 0.875rem; color: #cbd5e1;">Email: office@sparkmate.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 SparkMate Inc. All rights reserved. Clean Spaces, Better Places.
+    </div>
+  </footer>
+
+  <!-- Booking Wizard Overlay Modal -->
+  <div id="booking-wizard-overlay" class="wizard-overlay">
+    <div class="wizard-modal">
+      <div class="wizard-header">
+        <h3><i class="fa-solid fa-calendar-days"></i> Booking Wizard</h3>
+        <button onclick="closeBookingWizard()" style="background: none; color: white; font-size: 1.5rem; border: none; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="wizard-steps">
+        <div class="wizard-step active" id="wstep-1">1. Detail</div>
+        <div class="wizard-step" id="wstep-2">2. Package</div>
+        <div class="wizard-step" id="wstep-3">3. Schedule</div>
+        <div class="wizard-step" id="wstep-4">4. Confirm</div>
+      </div>
+      
+      <div class="wizard-body">
+        
+        <!-- Slide 1: Home specs -->
+        <div class="wizard-slide active" id="wslide-1">
+          <h4 style="margin-bottom: 1rem;">Tell us about your property</h4>
+          <div style="margin-bottom: 1.25rem;">
+            <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Office / Home Address</label>
+            <select id="wiz-address" style="margin-bottom: 0.5rem;">
+              <option value="123 Broadway, Floor 4, New York, NY 10006" data-site="site-1">New York HQ Office (123 Broadway, Floor 4)</option>
+              <option value="456 Flatbush Ave, Brooklyn, NY 11201" data-site="site-2">Brooklyn Lab Room (456 Flatbush Ave)</option>
+              <option value="custom">Add Custom Site Address...</option>
+            </select>
+            <input type="text" id="wiz-custom-address" placeholder="Enter custom street address..." style="display: none; margin-top: 0.5rem;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label for="wiz-size" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Square Footage</label>
+              <input type="number" id="wiz-size" value="1200" min="200" max="10000">
+            </div>
+            <div>
+              <label for="wiz-access" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Access Code / Key location</label>
+              <input type="text" id="wiz-access" value="KEY-4921" placeholder="e.g. Under doormat, code 1234">
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2: Package & add-ons -->
+        <div class="wizard-slide" id="wslide-2">
+          <h4 style="margin-bottom: 1rem;">Choose cleaning type & optional add-ons</h4>
+          <div class="option-grid">
+            <div class="option-card active" onclick="selectWizType(this, 'Standard Clean')">
+              <strong>Standard Clean</strong>
+              <div style="font-size: 0.8rem; margin-top: 0.25rem;">Routine wash & dust</div>
+            </div>
+            <div class="option-card" onclick="selectWizType(this, 'Deep Clean')">
+              <strong>Deep Clean</strong>
+              <div style="font-size: 0.8rem; margin-top: 0.25rem;">Detail wall & scrub</div>
+            </div>
+            <div class="option-card" onclick="selectWizType(this, 'Move-in/out')">
+              <strong>Move-in/out</strong>
+              <div style="font-size: 0.8rem; margin-top: 0.25rem;">End of lease spec</div>
+            </div>
+          </div>
+          
+          <div style="font-weight: 600; margin-bottom: 0.5rem;">Add-On Services</div>
+          <div class="option-grid">
+            <div class="option-card" id="addon-carpet" onclick="toggleAddon(this, 'carpet', 50)">
+              <i class="fa-solid fa-rug" style="font-size: 1.25rem; display: block; margin-bottom: 0.5rem; color: var(--spark-blue);"></i>
+              <strong>Carpet Steam</strong>
+              <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">+$50.00</div>
+            </div>
+            <div class="option-card" id="addon-windows" onclick="toggleAddon(this, 'windows', 40)">
+              <i class="fa-solid fa-window-maximize" style="font-size: 1.25rem; display: block; margin-bottom: 0.5rem; color: var(--spark-blue);"></i>
+              <strong>Inside Windows</strong>
+              <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">+$40.00</div>
+            </div>
+            <div class="option-card" id="addon-oven" onclick="toggleAddon(this, 'oven', 35)">
+              <i class="fa-solid fa-box" style="font-size: 1.25rem; display: block; margin-bottom: 0.5rem; color: var(--spark-blue);"></i>
+              <strong>Oven Detail</strong>
+              <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem;">+$35.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3: Time & Preferred Cleaner -->
+        <div class="wizard-slide" id="wslide-3">
+          <h4 style="margin-bottom: 1rem;">Schedule cleaner & assign preferences</h4>
+          <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div>
+              <label for="wiz-date" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Date</label>
+              <input type="date" id="wiz-date" required>
+            </div>
+            <div>
+              <label for="wiz-time" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Preferred Time</label>
+              <select id="wiz-time">
+                <option value="08:00 AM">08:00 AM</option>
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="12:00 PM">12:00 PM</option>
+                <option value="02:00 PM">02:00 PM</option>
+                <option value="04:00 PM">04:00 PM</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="wiz-cleaner" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Preferred Cleaner</label>
+            <select id="wiz-cleaner">
+              <option value="auto">Auto-Assign (Recommended)</option>
+              <option value="staff-1">Sarah Connor (4.9⭐)</option>
+              <option value="staff-2">Marcus Wright (4.7⭐)</option>
+              <option value="staff-3">Elena Rostova (4.8⭐)</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="wiz-notes" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Special Instructions</label>
+            <textarea id="wiz-notes" rows="3" placeholder="Please focus on dust accumulation near baseboards..."></textarea>
+          </div>
+        </div>
+
+        <!-- Slide 4: Summary checkout -->
+        <div class="wizard-slide" id="wslide-4">
+          <h4 style="margin-bottom: 1.5rem; text-align: center;"><i class="fa-solid fa-circle-check" style="color: var(--spark-green); font-size: 2.5rem; display: block; margin-bottom: 0.5rem;"></i> Confirm & Book Clean</h4>
+          
+          <div class="card" style="background: var(--bg-tertiary); margin-bottom: 1.5rem; padding: 1.25rem;">
+            <div class="flex-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              <span><strong>Property details:</strong></span>
+              <span id="sum-address" style="text-align: right; max-width: 250px; font-size: 0.875rem;">123 Broadway</span>
+            </div>
+            <div class="flex-between" style="border-bottom: 1px solid var(--border-color); padding: 0.5rem 0;">
+              <span><strong>Job Type:</strong></span>
+              <span id="sum-type">Standard Clean</span>
+            </div>
+            <div class="flex-between" style="border-bottom: 1px solid var(--border-color); padding: 0.5rem 0;">
+              <span><strong>Cleaner:</strong></span>
+              <span id="sum-cleaner">Auto-assigned</span>
+            </div>
+            <div class="flex-between" style="border-bottom: 1px solid var(--border-color); padding: 0.5rem 0;">
+              <span><strong>Scheduled:</strong></span>
+              <span id="sum-schedule">Tomorrow, 10:00 AM</span>
+            </div>
+            <div class="flex-between" style="padding-top: 0.5rem;">
+              <span style="font-size: 1.125rem; font-weight: 700;">Total Amount:</span>
+              <span id="sum-price" style="font-size: 1.125rem; font-weight: 800; color: var(--spark-blue);">$120.00</span>
+            </div>
+          </div>
+
+          <div style="font-size: 0.8rem; color: var(--text-light); text-align: center;">
+            <i class="fa-solid fa-lock"></i> Payment will be processed securely using the card on file.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="wizard-footer">
+        <button id="wiz-prev" onclick="moveWizStep(-1)" class="btn btn-secondary" style="visibility: hidden;">Back</button>
+        <button id="wiz-next" onclick="moveWizStep(1)" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal Overlay -->
+  <div id="login-modal-overlay" class="login-overlay">
+    <div class="login-modal">
+      <div class="flex-between" style="margin-bottom: 1.5rem;">
+        <h3>Portal Login</h3>
+        <button onclick="closeLoginModal()" style="background: none; font-size: 1.5rem; border: none; cursor: pointer; color: var(--text-primary);"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="event.preventDefault(); handleLoginSubmit();">
+        <div style="margin-bottom: 1rem;">
+          <label for="login-email" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Email Address</label>
+          <input type="email" id="login-email" required placeholder="name@sparkmate.com">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label for="login-pass" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Password</label>
+          <input type="password" id="login-pass" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1rem; color: var(--text-light); font-size: 0.875rem;">or connect with Google / OAuth</div>
+      <button onclick="simulateGoogleOAuth()" class="btn btn-secondary" style="width: 100%; margin-top: 0.75rem; justify-content: center;"><i class="fa-brands fa-google" style="color: #ea4335;"></i> Login with Google</button>
+
+      <div class="demo-accounts">
+        <strong style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Demo Quick Access Portals:</strong>
+        <button onclick="portalDirect('client')" class="btn btn-secondary demo-btn"><span>Client Portal</span> <i class="fa-solid fa-user-tie"></i></button>
+        <button onclick="portalDirect('staff')" class="btn btn-secondary demo-btn"><span>Staff Portal</span> <i class="fa-solid fa-clipboard-user"></i></button>
+        <button onclick="portalDirect('admin')" class="btn btn-secondary demo-btn"><span>Admin Portal</span> <i class="fa-solid fa-user-gear"></i></button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

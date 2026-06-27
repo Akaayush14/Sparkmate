@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Email | SparkMate</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    .auth-container {
+      max-width: 500px;
+      margin: 4rem auto;
+      padding: 1rem;
+      text-align: center;
+    }
+    .auth-card {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 2.5rem;
+      box-shadow: var(--card-shadow);
+    }
+    .auth-header h2 {
+      margin: 0;
+      color: var(--primary-navy);
+      font-size: 1.75rem;
+    }
+    [data-theme="dark"] .auth-header h2 {
+      color: var(--spark-cyan);
+    }
+    .auth-logo img {
+      height: 60px;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+    }
+    .verification-icon {
+      font-size: 4rem;
+      color: var(--spark-green);
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">
+            <img src="assets/logo.jpg" alt="SparkMate Logo">
+          </div>
+        </div>
+        
+        <div id="loading-state" style="display: block;">
+          <i class="fas fa-spinner fa-spin verification-icon"></i>
+          <h2>Verifying your email...</h2>
+          <p style="color: var(--text-secondary);">Please wait while we verify your email address.</p>
+        </div>
+        
+        <div id="success-state" style="display: none;">
+          <i class="fas fa-check-circle verification-icon"></i>
+          <h2>Email Verified!</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Your email address has been verified. You can now login to your SparkMate account.</p>
+          <a href="login.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+            <i class="fas fa-right-to-bracket"></i> Login Now
+          </a>
+        </div>
+        
+        <div id="error-state" style="display: none;">
+          <i class="fas fa-times-circle verification-icon" style="color: var(--error-red);"></i>
+          <h2>Verification Failed</h2>
+          <p id="error-message" style="color: var(--text-secondary); margin-bottom: 1.5rem;">Something went wrong. Please try again or contact support.</p>
+          <a href="login.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+            <i class="fas fa-home"></i> Go to Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+  <script type="module">
+    import { applyActionCode } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const oobCode = urlParams.get('oobCode');
+
+    if (!oobCode) {
+      // No verification code - show error
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+      document.getElementById('error-message').textContent = "Invalid verification link. Please request a new verification email from the login page.";
+    } else {
+      try {
+        // Try to apply the verification code
+        await applyActionCode(window.auth, oobCode);
+        
+        // Success
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('success-state').style.display = 'block';
+        
+        // Check if we have the user's UID in localStorage to update their profile
+        const uid = localStorage.getItem('sparkmate_uid');
+        if (uid) {
+          try {
+            await db.updateUser(uid, { emailVerified: true });
+          } catch (e) {
+            console.error("Error updating user profile:", e);
+          }
+        }
+        
+      } catch (error) {
+        console.error("Verification error:", error);
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('error-state').style.display = 'block';
+        
+        let errorMsg = "Something went wrong. Please try again or contact support.";
+        if (error.code === 'auth/invalid-action-code') {
+          errorMsg = "This verification link is invalid or has already been used. Please request a new verification email from the login page.";
+        } else if (error.code === 'auth/expired-action-code') {
+          errorMsg = "This verification link has expired. Please request a new verification email from the login page.";
+        }
+        
+        document.getElementById('error-message').textContent = errorMsg;
+      }
+    }
+  </script>
+</body>
+</html>

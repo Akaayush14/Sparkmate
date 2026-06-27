@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal | SparkMate Operations Desk</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    /* Admin Portal Custom Layouts */
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .ops-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    /* Simulated Live GPS Map View */
+    .gps-map-container {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      height: 380px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .map-grid-lines {
+      width: 100%;
+      height: 100%;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, var(--border-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0.6;
+    }
+    .map-street {
+      position: absolute;
+      background: rgba(50, 140, 193, 0.08);
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .map-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pin-head {
+      width: 34px;
+      height: 34px;
+      border-radius: 50% 50% 50% 0;
+      background: var(--spark-blue);
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+    }
+    .pin-head:hover {
+      transform: rotate(-45deg) scale(1.1);
+      background: var(--spark-green);
+    }
+    .pin-head i {
+      transform: rotate(45deg);
+      color: white;
+      font-size: 0.85rem;
+    }
+    .pin-head.active {
+      background: var(--spark-green);
+      animation: pulse 1.5s infinite;
+    }
+    .pin-label {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-top: 0.4rem;
+      white-space: nowrap;
+      box-shadow: var(--card-shadow);
+    }
+    
+    /* Alerts panel */
+    .alerts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 330px;
+      overflow-y: auto;
+    }
+    .alert-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--spark-blue);
+      border-radius: var(--border-radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alert-item.late {
+      border-left-color: #ef4444;
+    }
+    .alert-item.info {
+      border-left-color: var(--spark-cyan);
+    }
+
+    /* Table styles */
+    .crm-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .crm-table th {
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--border-color);
+      color: var(--text-light);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+    .crm-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+    
+    /* Dispatch board drag blocks */
+    .dispatch-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .dispatch-lane {
+      background: var(--bg-tertiary);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      min-height: 400px;
+    }
+    .dispatch-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-sm);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--card-shadow);
+      cursor: pointer;
+    }
+    
+    /* Simple Charts grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/admin-BcNdsW36.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/app-DaXCS0Su.js">
+  <link rel="stylesheet" crossorigin href="/assets/app-BbluD4jH.css">
+</head>
+<body>
+
+  <div class="portal-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="portal-sidebar" id="sidebar">
+      <div class="portal-logo">
+        <img src="/assets/logo-CKMnBTCN.jpg" alt="SparkMate Logo">
+        SparkMate Admin
+      </div>
+      <ul class="portal-menu">
+        <li class="portal-item"><button class="portal-btn active" onclick="switchAdminView('dashboard')"><i class="fa-solid fa-chart-line"></i> Dashboard</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchAdminView('dispatch')"><i class="fa-solid fa-calendar-days"></i> Dispatch Board</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchAdminView('staff')"><i class="fa-solid fa-people-carry-box"></i> Staff CRM</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchAdminView('billing')"><i class="fa-solid fa-file-invoice-dollar"></i> Billing & CRM</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchAdminView('inventory')"><i class="fa-solid fa-warehouse"></i> Inventory</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchAdminView('analytics')"><i class="fa-solid fa-chart-pie"></i> Analytics</button></li>
+      </ul>
+      <div style="margin-top: auto;">
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <span style="font-size:0.85rem; font-weight:600; color:var(--text-secondary);">Dark Theme</span>
+          <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <button onclick="logout()" class="btn btn-secondary" style="width: 100%; justify-content: center;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="portal-main">
+      
+      <!-- Top header bar -->
+      <div class="portal-header">
+        <div>
+          <button onclick="toggleSidebar()" class="btn btn-secondary mobile-menu-btn" style="margin-right: 1rem;"><i class="fa-solid fa-bars"></i></button>
+          <span style="color: var(--text-light); font-size: 0.875rem;">SparkMate Operations Console</span>
+          <h2 style="font-size: 1.5rem;">Admin Control Center</h2>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+          <a href="index.html" class="btn btn-secondary"><i class="fa-solid fa-house"></i> Home Website</a>
+          <button onclick="dispatchUrgentClean()" class="btn btn-danger"><i class="fa-solid fa-truck-fast"></i> Emergency Dispatch</button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: Operations Dashboard -->
+      <div id="view-dashboard" class="portal-view active">
+        <!-- Daily metrics -->
+        <div class="admin-stats">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-truck-moving"></i></div>
+            <div>
+              <div class="stat-num" id="stat-active-jobs">1</div>
+              <div class="stat-label">Active Cleans Today</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="color: var(--spark-green); background: rgba(125,185,60,0.1);"><i class="fa-solid fa-circle-dollar-to-slot"></i></div>
+            <div>
+              <div class="stat-num" id="stat-revenue">$395.00</div>
+              <div class="stat-label">Revenue logged</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="color: #f59e0b; background: rgba(245,158,11,0.1);"><i class="fa-solid fa-star"></i></div>
+            <div>
+              <div class="stat-num" id="stat-rating">4.8⭐</div>
+              <div class="stat-label">Customer Satisfaction</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="color: #ef4444; background: rgba(239,68,68,0.1);"><i class="fa-solid fa-bell"></i></div>
+            <div>
+              <div class="stat-num" id="stat-alerts">0</div>
+              <div class="stat-label">System Alerts</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ops-grid">
+          <!-- Live map -->
+          <div class="card" style="padding: 1.5rem;">
+            <div class="flex-between" style="margin-bottom: 1rem;">
+              <h3><i class="fa-solid fa-earth-americas" style="color: var(--spark-blue);"></i> Live Staff Location Monitor</h3>
+              <span style="font-size: 0.8rem; background: rgba(125,185,60,0.1); color: var(--spark-green); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: bold;"><i class="fa-solid fa-circle fa-beat"></i> Live Syncing</span>
+            </div>
+            
+            <div class="gps-map-container" id="ops-map">
+              <div class="map-grid-lines"></div>
+              <!-- Simulated Streets -->
+              <div class="map-street" style="top: 80px; left: 0; width: 100%; height: 25px;">Broadway Avenue</div>
+              <div class="map-street" style="top: 220px; left: 0; width: 100%; height: 25px;">Flatbush Avenue</div>
+              <div class="map-street" style="top: 0; left: 180px; width: 30px; height: 100%; writing-mode: vertical-rl;">42nd Street</div>
+              <div class="map-street" style="top: 0; left: 340px; width: 30px; height: 100%; writing-mode: vertical-rl;">5th Avenue</div>
+              
+              <!-- Pins (rendered via JavaScript) -->
+            </div>
+          </div>
+
+          <!-- Alert inbox -->
+          <div class="card" style="padding: 1.5rem;">
+            <div class="flex-between" style="margin-bottom: 1rem;">
+              <h3>Alerts Inbox</h3>
+              <button onclick="clearAllAlerts()" class="btn btn-secondary" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;">Clear All</button>
+            </div>
+            <div class="alerts-list" id="alerts-list-container">
+              <!-- Render notifications recipient:admin -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: Drag & Drop Dispatcher -->
+      <div id="view-dispatch" class="portal-view">
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 1rem;">
+            <h3>Schedule & Dispatch Board</h3>
+            <span style="font-size: 0.85rem; color: var(--text-light);">Assign cleaners to bookings or swap shifts.</span>
+          </div>
+          
+          <div class="dispatch-board">
+            
+            <!-- Lane 1: Pending jobs -->
+            <div class="dispatch-lane">
+              <h4 style="border-bottom: 2px solid #e2b13c; padding-bottom: 0.5rem; color: #b48614; margin-bottom: 1rem;"><i class="fa-solid fa-clock-rotate-left"></i> Unassigned Jobs</h4>
+              <div id="lane-unassigned">
+                <!-- jobs with status:pending or cleanerId:null -->
+              </div>
+            </div>
+
+            <!-- Lane 2: Assigned jobs -->
+            <div class="dispatch-lane">
+              <h4 style="border-bottom: 2px solid var(--spark-blue); padding-bottom: 0.5rem; color: var(--spark-blue); margin-bottom: 1rem;"><i class="fa-solid fa-user-check"></i> Assigned / Scheduled</h4>
+              <div id="lane-assigned">
+                <!-- jobs status:assigned -->
+              </div>
+            </div>
+
+            <!-- Lane 3: In Progress & Completed -->
+            <div class="dispatch-lane">
+              <h4 style="border-bottom: 2px solid var(--spark-green); padding-bottom: 0.5rem; color: var(--spark-green); margin-bottom: 1rem;"><i class="fa-solid fa-clipboard-check"></i> Active & Completed</h4>
+              <div id="lane-active">
+                <!-- jobs status:in-progress / completed -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: Staff CRM Management -->
+      <div id="view-staff" class="portal-view">
+        <div class="grid-2" style="grid-template-columns: 2fr 1fr; margin-bottom: 2rem;">
+          <div class="card">
+            <h3>Staff Roster CRM</h3>
+            <div style="margin-top: 1rem; overflow-x: auto;">
+              <table class="crm-table" id="staff-crm-table">
+                <thead>
+                  <tr>
+                    <th>Staff Name</th>
+                    <th>Average Rating</th>
+                    <th>Jobs Done</th>
+                    <th>Active Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-crm-tbody">
+                  <!-- dynamic staff rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Onboard new staff form -->
+          <div class="card">
+            <h3>Onboard New Cleaner</h3>
+            <form onsubmit="event.preventDefault(); onboardStaffMember();" style="margin-top: 1rem;">
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Cleaner Name</label>
+                <input type="text" id="ob-name" required placeholder="John Connor">
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Phone Number</label>
+                <input type="tel" id="ob-phone" required placeholder="+1 (555) 018-4921">
+              </div>
+              <div style="margin-bottom: 1.5rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Compliance Checks</label>
+                <div style="display:flex; flex-direction:column; gap:0.4rem; font-size: 0.85rem; margin-top:0.25rem;">
+                  <label><input type="checkbox" id="ob-dbs" style="width:auto; margin-right:0.5rem;">DBS Criminal Checked</label>
+                  <label><input type="checkbox" id="ob-id" style="width:auto; margin-right:0.5rem;">ID Verified</label>
+                  <label><input type="checkbox" id="ob-training" style="width:auto; margin-right:0.5rem;">Onboarding Academy Completed</label>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Register Cleaner</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Payroll Panel -->
+        <div class="card">
+          <h3>Roster Payroll Ledger (Auto-Calculated)</h3>
+          <p style="font-size:0.875rem; color:var(--text-light); margin-bottom:1rem;">Payroll calculates staff payout rate as 65% of job gross pricing, plus rating bonuses.</p>
+          <table class="crm-table">
+            <thead>
+              <tr>
+                <th>Cleaner</th>
+                <th>Base Hours Clocked</th>
+                <th>Estimated Payout</th>
+                <th>5⭐ Rating Bonus</th>
+                <th>Net Wages due</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="payroll-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Billing & CRM invoices -->
+      <div id="view-billing" class="portal-view">
+        <div class="grid-2" style="grid-template-columns: 2fr 1fr;">
+          <!-- CRM Billing list -->
+          <div class="card">
+            <h3>Invoice History Ledger</h3>
+            <div style="margin-top: 1rem; overflow-x: auto;">
+              <table class="crm-table">
+                <thead>
+                  <tr>
+                    <th>Invoice ID</th>
+                    <th>Client</th>
+                    <th>Gross Cost</th>
+                    <th>Issued Date</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-billing-tbody">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quote Builder -->
+          <div class="card">
+            <h3>Custom Corporate Quote Builder</h3>
+            <form onsubmit="event.preventDefault(); compileCorporateQuote();" style="margin-top: 1rem;">
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Corporate Client</label>
+                <input type="text" id="quote-client" placeholder="Google NY Hub" required>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Floor Size (sq ft)</label>
+                <input type="number" id="quote-size" value="5000" required>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Monthly Cleans Frequency</label>
+                <select id="quote-freq">
+                  <option value="20">Daily clean (20 visits/mo)</option>
+                  <option value="4">Weekly clean (4 visits/mo)</option>
+                  <option value="8">Bi-weekly clean (8 visits/mo)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-accent" style="width: 100%; justify-content: center;"><i class="fa-solid fa-file-pdf"></i> Build Proposal PDF</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: Inventory Settings -->
+      <div id="view-inventory" class="portal-view">
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 1.5rem;">
+            <h3>Inventory levels & Low Stock Warning</h3>
+            <button onclick="triggerAutoRestock()" class="btn btn-primary"><i class="fa-solid fa-truck-loading"></i> Auto-Reorder low stock items</button>
+          </div>
+          <table class="crm-table">
+            <thead>
+              <tr>
+                <th>Item Description</th>
+                <th>Quantity in stock</th>
+                <th>Min Safety Threshold</th>
+                <th>Supplier</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIEW 6: Analytics & Charts Reports -->
+      <div id="view-analytics" class="portal-view">
+        <div class="charts-grid">
+          <div class="card">
+            <h3 style="margin-bottom: 1rem;">Monthly Revenue Trend ($)</h3>
+            <canvas id="chart-revenue" height="200"></canvas>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom: 1rem;">Client satisfaction score trend (NPS)</h3>
+            <canvas id="chart-nps" height="200"></canvas>
+          </div>
+        </div>
+        
+        <div class="charts-grid">
+          <div class="card" style="grid-column: span 2;">
+            <h3 style="margin-bottom: 1rem;">Cleaner Speed vs Star Rating KPI Matrix</h3>
+            <canvas id="chart-kpis" height="100"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

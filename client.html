@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal | SparkMate Dashboard</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Client Portal Custom Styles */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      box-shadow: var(--card-shadow);
+    }
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(50, 140, 193, 0.1);
+      color: var(--spark-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .stat-num {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-light);
+    }
+
+    /* Before-After Photo Slider Component */
+    .ba-slider {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      border-radius: var(--border-radius-sm);
+      overflow: hidden;
+      margin-top: 1rem;
+      box-shadow: var(--card-shadow);
+    }
+    .ba-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-select: none;
+    }
+    .ba-before {
+      z-index: 10;
+    }
+    .ba-after {
+      z-index: 20;
+      clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+    }
+    .ba-control {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      z-index: 30;
+      cursor: ew-resize;
+    }
+    .ba-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      background: #ffffff;
+      z-index: 25;
+      pointer-events: none;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .ba-divider::after {
+      content: '↔';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      background: #ffffff;
+      color: var(--primary-navy);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .ba-label {
+      position: absolute;
+      bottom: 1rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: bold;
+      border-radius: 4px;
+      z-index: 22;
+      pointer-events: none;
+    }
+    .ba-label.label-before {
+      right: 1rem;
+    }
+    .ba-label.label-after {
+      left: 1rem;
+      z-index: 23;
+    }
+
+    /* Checklist view style */
+    .check-list-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-tertiary);
+      padding: 0.75rem 1rem;
+      border-radius: var(--border-radius-sm);
+      border: 1px solid var(--border-color);
+    }
+    .check-item.done {
+      border-left: 4px solid var(--spark-green);
+    }
+    .check-item.done i {
+      color: var(--spark-green);
+    }
+    .check-item.pending i {
+      color: var(--text-light);
+    }
+
+    /* Invoice List & Stripe Modal */
+    .pay-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .pay-modal {
+      background: var(--bg-secondary);
+      width: 90%;
+      max-width: 420px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Chat Styling */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 450px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      background: var(--bg-secondary);
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: var(--bg-tertiary);
+    }
+    .chat-bubble {
+      max-width: 70%;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    .chat-bubble.client {
+      background: var(--spark-blue);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .chat-bubble.admin {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+      border: 1px solid var(--border-color);
+    }
+    .chat-input-area {
+      padding: 1rem;
+      display: flex;
+      gap: 0.75rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Review stars selector */
+    .star-select {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 1.75rem;
+      margin: 0.5rem 0 1rem;
+      cursor: pointer;
+    }
+    .star-select i {
+      color: #cbd5e1;
+      transition: color 0.1s ease;
+    }
+    .star-select i.active {
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="portal-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="portal-sidebar" id="sidebar">
+      <div class="portal-logo">
+        <img src="assets/logo.jpg" alt="SparkMate Logo">
+        SparkMate
+      </div>
+      <ul class="portal-menu">
+        <li class="portal-item"><button class="portal-btn active" onclick="switchView('overview')"><i class="fa-solid fa-chart-pie"></i> Overview</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchView('bookings')"><i class="fa-solid fa-calendar-check"></i> Bookings</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchView('invoices')"><i class="fa-solid fa-file-invoice-dollar"></i> Invoices & Pay</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchView('reports')"><i class="fa-solid fa-clipboard-list"></i> Cleaning Reports</button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchView('chat')"><i class="fa-solid fa-comments"></i> Messages <span class="badge" id="chat-badge" style="display:none; background:red; color:white; border-radius:50%; width:8px; height:8px;"></span></button></li>
+        <li class="portal-item"><button class="portal-btn" onclick="switchView('settings')"><i class="fa-solid fa-sliders"></i> Settings</button></li>
+      </ul>
+      <div style="margin-top: auto;">
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <span style="font-size:0.85rem; font-weight:600; color:var(--text-secondary);">Dark Theme</span>
+          <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <button onclick="logout()" class="btn btn-secondary" style="width: 100%; justify-content: center;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="portal-main">
+      
+      <!-- Top header bar -->
+      <div class="portal-header">
+        <div>
+          <button onclick="toggleSidebar()" class="btn btn-secondary mobile-menu-btn" style="margin-right: 1rem;"><i class="fa-solid fa-bars"></i></button>
+          <span style="color: var(--text-light); font-size: 0.875rem;">Welcome back,</span>
+          <h2 style="font-size: 1.5rem;" id="client-greeting">Aayush Kharel</h2>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+          <a href="index.html" class="btn btn-secondary"><i class="fa-solid fa-house"></i> Home Website</a>
+          <button onclick="window.location.href='index.html?openBooking=true'" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Booking</button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: Overview Dashboard -->
+      <div id="view-overview" class="portal-view active">
+        <!-- Quick stats -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-sparkles"></i></div>
+            <div>
+              <div class="stat-num" id="stat-total-cleans">1</div>
+              <div class="stat-label">Total Cleans</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-award"></i></div>
+            <div>
+              <div class="stat-num" id="stat-points">340</div>
+              <div class="stat-label">Loyalty Points</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-percent"></i></div>
+            <div>
+              <div class="stat-num" id="stat-referrals">0</div>
+              <div class="stat-label">Invited Friends</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-building"></i></div>
+            <div>
+              <div class="stat-num" id="stat-sites">2</div>
+              <div class="stat-label">Registered Sites</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Next Clean Widget -->
+          <div class="card">
+            <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;"><i class="fa-solid fa-clock" style="color: var(--spark-blue);"></i> Next Cleaning Job</h3>
+            <div id="next-job-details" style="padding-top: 1rem;">
+              <!-- Dynamic Details -->
+            </div>
+          </div>
+
+          <!-- Spent Trend Analytics / Referral -->
+          <div class="card flex-between" style="flex-direction: column; align-items: stretch; justify-content: space-between;">
+            <div>
+              <h3 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-gift" style="color: var(--spark-green);"></i> Refer & Earn $25</h3>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Share the SparkMate cleaning experience. When a friend signs up using your code, you both earn $25 credit!</p>
+              <div class="flex-between" style="background: var(--bg-tertiary); border: 1px dashed var(--spark-blue); padding: 0.75rem 1rem; border-radius: var(--border-radius-sm);">
+                <code style="font-weight: bold; font-size: 1.1rem; color: var(--spark-blue);" id="referral-code">SPARK-AAYUSH</code>
+                <button onclick="navigator.clipboard.writeText('SPARK-AAYUSH'); alert('Referral code copied to clipboard!');" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">Copy Code</button>
+              </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+              <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-chart-line"></i> Spend Analytics</h4>
+              <div class="flex-between">
+                <span style="font-size: 0.9rem; color: var(--text-secondary);">Current Month Spend:</span>
+                <strong style="color: var(--primary-navy);" id="spend-analytics-val">$180.00</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: Bookings Tab -->
+      <div id="view-bookings" class="portal-view">
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 1.5rem;">
+            <h3>My Scheduled Cleanings</h3>
+            <select id="booking-site-filter" style="width: auto;">
+              <option value="all">All Registered Sites</option>
+              <option value="site-1">New York HQ Office</option>
+              <option value="site-2">Brooklyn Lab Room</option>
+            </select>
+          </div>
+          <div id="bookings-list-container">
+            <!-- Dynamic jobs list -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: Invoices Tab -->
+      <div id="view-invoices" class="portal-view">
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 1.5rem;">
+            <h3>Invoice History & Payments</h3>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <input type="checkbox" id="autopay-toggle" style="width:auto; margin:0;">
+              <label for="autopay-toggle" style="font-size:0.9rem; font-weight:600;">Enable Autopay (recurring billing)</label>
+            </div>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; text-align: left;" id="invoices-table">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-light); font-size: 0.9rem;">
+                <th style="padding: 1rem 0.5rem;">Invoice ID</th>
+                <th>Clean Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Payment Method</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="invoices-list-tbody">
+              <!-- Dynamic invoice rows -->
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Dispute Raised Panel -->
+        <div class="card" style="margin-top: 2rem;">
+          <h3>Raise a Dispute / Request Refund</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Not satisfied with a clean? Raise a ticket within 48 hours of completion. Our supervisors will review the checklist logs and contact you.</p>
+          <form onsubmit="event.preventDefault(); alert('Dispute raised successfully. Ticket #DS-4029 opened. An admin will review it shortly.'); this.reset();">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:0.25rem;">Select completed job</label>
+                <select required id="dispute-job-select">
+                  <!-- completed jobs -->
+                </select>
+              </div>
+              <div>
+                <label style="font-weight:600; display:block; margin-bottom:0.25rem;">Dispute Type</label>
+                <select required>
+                  <option>Missed cleaning items</option>
+                  <option>Poor quality work</option>
+                  <option>Damaged property / item</option>
+                  <option>Other / dispute pricing</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <textarea placeholder="Describe the issue in detail. If possible, list the rooms that require touchups." rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger"><i class="fa-solid fa-circle-exclamation"></i> Submit Dispute Ticket</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Cleaning Reports Tab -->
+      <div id="view-reports" class="portal-view">
+        <div class="grid-2">
+          <!-- Selection & Checklist -->
+          <div class="card">
+            <h3>Visual Cleaning Reports</h3>
+            <div style="margin: 1rem 0;">
+              <label for="report-job-select" style="font-weight: 600; display:block; margin-bottom:0.25rem;">Select Job History Log</label>
+              <select id="report-job-select">
+                <!-- dynamic values -->
+              </select>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+              <h4><i class="fa-solid fa-list-check" style="color: var(--spark-blue);"></i> Completion Checklist</h4>
+              <div class="check-list-grid" id="report-checklist">
+                <!-- dynamic check items -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo Proofs & NPS -->
+          <div class="card" id="report-details-container">
+            <div class="flex-between">
+              <h3>Before & After Proof</h3>
+              <button onclick="downloadMockPDF()" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;"><i class="fa-solid fa-file-pdf"></i> Download PDF Summary</button>
+            </div>
+            
+            <!-- Beautiful sliding comparison -->
+            <div class="ba-slider">
+              <span class="ba-label label-before">BEFORE</span>
+              <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600" class="ba-img ba-before" alt="Before Cleaning">
+              
+              <span class="ba-label label-after">AFTER CLEANING</span>
+              <img src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&q=80&w=600" class="ba-img ba-after" id="ba-after-img" alt="After Cleaning">
+              
+              <div class="ba-divider" id="ba-divider"></div>
+              <input type="range" min="0" max="100" value="50" class="ba-control" id="ba-range" aria-label="Before/After Slider Control">
+            </div>
+            
+            <!-- Rate and review -->
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;" id="rating-widget-box">
+              <h4>Leave Rating & Feedback</h4>
+              <div class="star-select" id="feedback-stars">
+                <i class="fa-solid fa-star" data-star="1"></i>
+                <i class="fa-solid fa-star" data-star="2"></i>
+                <i class="fa-solid fa-star" data-star="3"></i>
+                <i class="fa-solid fa-star" data-star="4"></i>
+                <i class="fa-solid fa-star" data-star="5"></i>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <label style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:0.25rem;">Would you recommend SparkMate to others? (NPS Score: 0-10)</label>
+                <select id="feedback-nps" style="width: auto;">
+                  <option value="10">10 - Extremely likely</option>
+                  <option value="9">9</option>
+                  <option value="8">8</option>
+                  <option value="7">7</option>
+                  <option value="6">6</option>
+                  <option value="5">5 or lower</option>
+                </select>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <textarea id="feedback-comment" placeholder="Write any specific feedback on Sarah Connor's cleaning..." rows="2"></textarea>
+              </div>
+              <button onclick="submitJobFeedback()" class="btn btn-accent"><i class="fa-solid fa-check"></i> Submit Feedback</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: Messages Tab -->
+      <div id="view-chat" class="portal-view">
+        <div class="card">
+          <h3 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-headset" style="color: var(--spark-blue);"></i> Live Help & Support Chat</h3>
+          <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 1.5rem;">Chat with your assigned cleaner, Sarah Connor, or connect directly to an Admin supervisor.</p>
+          
+          <div class="chat-container">
+            <div class="chat-messages" id="chat-messages-container">
+              <!-- Chat history -->
+            </div>
+            <div class="chat-input-area">
+              <input type="text" id="chat-user-input" placeholder="Type your message here..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
+              <button onclick="sendChatMessage()" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 6: Settings Tab -->
+      <div id="view-settings" class="portal-view">
+        <div class="grid-2">
+          <!-- Client Company Profile -->
+          <div class="card">
+            <h3>Company Profile</h3>
+            <form id="settings-profile-form" onsubmit="event.preventDefault(); updateClientProfile();" style="margin-top: 1rem;">
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display:block; margin-bottom:0.25rem;">Contact Name</label>
+                <input type="text" id="profile-name" value="Aayush Kharel" required>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display:block; margin-bottom:0.25rem;">Email Address</label>
+                <input type="email" id="profile-email" value="client@sparkmate.com" required>
+              </div>
+              <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display:block; margin-bottom:0.25rem;">Phone Number</label>
+                <input type="tel" id="profile-phone" value="+1 (555) 017-3849" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+          </div>
+
+          <!-- Site Access Management -->
+          <div class="card">
+            <h3>Registered Sites & Access</h3>
+            <div style="margin-top: 1rem;" id="settings-sites-list">
+              <!-- Render Sites -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Stripe-like Payment Modal Overlay -->
+  <div id="pay-modal-overlay" class="pay-modal-overlay">
+    <div class="pay-modal">
+      <div class="flex-between" style="margin-bottom: 1.5rem;">
+        <h3>Pay Online</h3>
+        <button onclick="closePayModal()" style="background: none; font-size: 1.5rem; border: none; cursor: pointer; color: var(--text-primary);"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Invoice Number: <strong id="pay-inv-id">INV-099</strong></p>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">Total Amount due: <strong style="color: var(--spark-blue); font-size: 1.25rem;" id="pay-inv-amount">$120.00</strong></p>
+      </div>
+      <form onsubmit="event.preventDefault(); submitStripePayment();">
+        <div style="margin-bottom: 1rem;">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Cardholder Name</label>
+          <input type="text" value="Aayush Kharel" required>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Credit Card Number</label>
+          <div style="position: relative;">
+            <input type="text" placeholder="4242 4242 4242 4242" pattern="[0-9 ]{19}" value="4242 4242 4242 4242" required style="padding-left: 2.5rem;">
+            <i class="fa-solid fa-credit-card" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Expiry Date</label>
+            <input type="text" placeholder="MM/YY" value="12/28" required>
+          </div>
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">CVC</label>
+            <input type="text" placeholder="123" value="123" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-accent" style="width: 100%; justify-content: center;"><i class="fa-solid fa-shield-check"></i> Authorize & Pay</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/client.js"></script>
+</body>
+</html>

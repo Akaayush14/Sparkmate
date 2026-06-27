@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | SparkMate</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    .auth-container {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .auth-card {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+    }
+    .auth-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .auth-logo {
+      flex: 0 0 auto;
+    }
+    .auth-logo img {
+      height: 50px;
+      border-radius: 8px;
+    }
+    .auth-header h2 {
+      flex: 1;
+      margin: 0;
+      color: var(--primary-navy);
+      font-size: 1.5rem;
+      text-align: center;
+      transform: translateX(-25px);
+    }
+    [data-theme="dark"] .auth-header h2 {
+      color: var(--spark-cyan);
+    }
+    .role-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .role-btn {
+      padding: 0.75rem;
+      border-radius: var(--border-radius-sm);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+    .role-btn.active {
+      background: var(--spark-blue);
+      color: white;
+      border-color: var(--spark-blue);
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .auth-footer a {
+      color: var(--spark-blue);
+      font-weight: 600;
+    }
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-sm);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: border-color 0.2s ease;
+    }
+    select:focus {
+      outline: none;
+      border-color: var(--spark-blue);
+    }
+    input[type="radio"] {
+      accent-color: var(--spark-blue);
+    }
+    input[type="file"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-sm);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    input[type="file"]:hover {
+      border-color: var(--spark-blue);
+    }
+    .password-container {
+      position: relative;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .error-message {
+      color: #dc3545;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+    input.error {
+      border-color: #dc3545;
+    }
+    .password-strength {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .password-strength-bar {
+      height: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+      margin-top: 0.25rem;
+    }
+    .password-strength-bar div {
+      height: 100%;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    .strength-weak { background: #dc3545; width: 33%; }
+    .strength-medium { background: #ffc107; width: 66%; }
+    .strength-strong { background: #28a745; width: 100%; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">
+            <img src="assets/logo.jpg" alt="SparkMate Logo">
+          </div>
+          <h2>Create your account</h2>
+        </div>
+        
+        <div class="role-toggle">
+          <button class="role-btn active" id="role-client" onclick="selectRole('client')">
+            <i class="fa-solid fa-user-tie"></i> Client
+          </button>
+          <button class="role-btn" id="role-staff" onclick="selectRole('staff')">
+            <i class="fa-solid fa-broom"></i> Staff
+          </button>
+        </div>
+        
+        <form id="register-form" onsubmit="handleRegister(event)">
+          <div style="margin-bottom: 1.25rem;">
+            <label for="register-name" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Full Name</label>
+            <input type="text" id="register-name" required placeholder="John Doe">
+            <div id="name-error" class="error-message" style="display: none;"></div>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <label for="register-email" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Email Address</label>
+            <input type="email" id="register-email" required placeholder="you@gmail.com">
+            <div id="email-error" class="error-message" style="display: none;"></div>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <label for="register-phone" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Phone Number</label>
+            <input type="tel" id="register-phone" required placeholder="+1 (555) 000-0000">
+            <div id="phone-error" class="error-message" style="display: none;"></div>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <label for="register-password" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Password</label>
+            <div class="password-container">
+              <input type="password" id="register-password" placeholder="••••••••" required minlength="7">
+              <span class="password-toggle" onclick="togglePassword('register-password', 'password-eye')">
+                <i id="password-eye" class="fa-solid fa-eye-slash"></i>
+              </span>
+            </div>
+            <div id="password-error" class="error-message" style="display: none;"></div>
+            <div id="password-strength" class="password-strength">
+              <div id="password-strength-bar" class="password-strength-bar">
+                <div id="password-strength-fill"></div>
+              </div>
+              <div id="password-strength-text" style="color: var(--text-secondary);"></div>
+            </div>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <label for="confirm-password" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Confirm Password</label>
+            <div class="password-container">
+              <input type="password" id="confirm-password" placeholder="••••••••" required>
+              <span class="password-toggle" onclick="togglePassword('confirm-password', 'confirm-password-eye')">
+                <i id="confirm-password-eye" class="fa-solid fa-eye-slash"></i>
+              </span>
+            </div>
+            <div id="confirm-password-error" class="error-message" style="display: none;"></div>
+          </div>
+
+          <div id="client-fields">
+            <div style="margin-bottom: 1.25rem;">
+              <label for="client-contact-method" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Preferred Contact Method</label>
+              <select id="client-contact-method">
+                <option value="email">Email</option>
+                <option value="phone">Phone Call</option>
+                <option value="sms">Text Message</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="client-dob" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Date of Birth (Optional)</label>
+              <input type="date" id="client-dob">
+            </div>
+          </div>
+
+          <div id="staff-fields" style="display: none;">
+            <div style="margin-bottom: 1.25rem;">
+              <label for="staff-address" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Full Address</label>
+              <input type="text" id="staff-address" placeholder="123 Main St, City, State, ZIP" required>
+              <div id="address-error" class="error-message" style="display: none;"></div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="staff-dob" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Date of Birth</label>
+              <input type="date" id="staff-dob" required>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="staff-experience" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Years of Cleaning Experience</label>
+              <input type="number" id="staff-experience" placeholder="0" min="0" max="70" required>
+              <div id="experience-error" class="error-message" style="display: none;"></div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="staff-areas" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Areas Willing to Work</label>
+              <input type="text" id="staff-areas" placeholder="Downtown, Westside" required>
+              <div id="areas-error" class="error-message" style="display: none;"></div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="staff-emergency-name" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Emergency Contact Name</label>
+              <input type="text" id="staff-emergency-name" placeholder="Jane Doe" required>
+              <div id="emergency-name-error" class="error-message" style="display: none;"></div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="staff-emergency-phone" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Emergency Contact Phone</label>
+              <input type="tel" id="staff-emergency-phone" placeholder="+1 (555) 000-0000" required>
+              <div id="emergency-phone-error" class="error-message" style="display: none;"></div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Do you have your own transportation?</label>
+              <div style="display: flex; gap: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="radio" name="staff-transport" value="yes" id="staff-transport-yes" required>
+                  Yes
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="radio" name="staff-transport" value="no" id="staff-transport-no">
+                  No
+                </label>
+              </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Do you have your own cleaning supplies/tools?</label>
+              <div style="display: flex; gap: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="radio" name="staff-equipment" value="yes" id="staff-equipment-yes" required>
+                  Yes
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="radio" name="staff-equipment" value="no" id="staff-equipment-no">
+                  No
+                </label>
+              </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="staff-certification" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Upload Certification (Optional)</label>
+              <input type="file" id="staff-certification" accept=".pdf,.jpg,.jpeg,.png">
+              <div id="certification-error" class="error-message" style="display: none;"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+          </button>
+        </form>
+        
+        <div class="auth-footer">
+          Already have an account? <a href="login.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+  <script type="module">
+    let selectedRole = 'client';
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`role-${role}`).classList.add('active');
+      
+      if (role === 'client') {
+        document.getElementById('client-fields').style.display = 'block';
+        document.getElementById('staff-fields').style.display = 'none';
+      } else {
+        document.getElementById('client-fields').style.display = 'none';
+        document.getElementById('staff-fields').style.display = 'block';
+      }
+    }
+
+    function togglePassword(inputId, eyeId) {
+      const passwordInput = document.getElementById(inputId);
+      const passwordEye = document.getElementById(eyeId);
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordEye.classList.remove('fa-eye-slash');
+        passwordEye.classList.add('fa-eye');
+      } else {
+        passwordInput.type = 'password';
+        passwordEye.classList.remove('fa-eye');
+        passwordEye.classList.add('fa-eye-slash');
+      }
+    }
+
+    function validateName(name) {
+      const nameError = document.getElementById('name-error');
+      const nameInput = document.getElementById('register-name');
+      const nameRegex = /^[a-zA-Z]+(?:[' -][a-zA-Z]+)*$/;
+      
+      if (!nameRegex.test(name)) {
+        nameError.textContent = 'Name should only contain letters, spaces, hyphens, and apostrophes';
+        nameError.style.display = 'block';
+        nameInput.classList.add('error');
+        return false;
+      } else if (name.length < 2) {
+        nameError.textContent = 'Name must be at least 2 characters';
+        nameError.style.display = 'block';
+        nameInput.classList.add('error');
+        return false;
+      } else {
+        nameError.style.display = 'none';
+        nameInput.classList.remove('error');
+        return true;
+      }
+    }
+
+    function validateEmail(email) {
+      const emailError = document.getElementById('email-error');
+      const emailInput = document.getElementById('register-email');
+      
+      if (!email.endsWith('@gmail.com')) {
+        emailError.textContent = 'Email must end with @gmail.com';
+        emailError.style.display = 'block';
+        emailInput.classList.add('error');
+        return false;
+      } else {
+        emailError.style.display = 'none';
+        emailInput.classList.remove('error');
+        return true;
+      }
+    }
+
+    function validatePhone(phone, errorId = 'phone-error', inputId = 'register-phone') {
+      const phoneError = document.getElementById(errorId);
+      const phoneInput = document.getElementById(inputId);
+      const phoneRegex = /^[+]?[1-9][0-9]{0,2}[-.]?[(]?[0-9]{1,3}[)]?[-.]?[0-9]{1,4}[-.]?[0-9]{1,4}[-.]?[0-9]{1,9}$/;
+      
+      if (!phoneRegex.test(phone) || phone.replace(/\D/g, '').length < 10) {
+        phoneError.textContent = 'Please enter a valid phone number with at least 10 digits';
+        phoneError.style.display = 'block';
+        phoneInput.classList.add('error');
+        return false;
+      } else {
+        phoneError.style.display = 'none';
+        phoneInput.classList.remove('error');
+        return true;
+      }
+    }
+
+    function validatePassword(password) {
+      const passwordError = document.getElementById('password-error');
+      const passwordInput = document.getElementById('register-password');
+      const strengthFill = document.getElementById('password-strength-fill');
+      const strengthText = document.getElementById('password-strength-text');
+      
+      // Check password length first
+      if (password.length < 7) {
+        passwordError.textContent = 'Password must be more than 6 characters';
+        passwordError.style.display = 'block';
+        passwordInput.classList.add('error');
+        strengthFill.className = '';
+        strengthText.textContent = '';
+        return false;
+      }
+      
+      // Check password strength
+      let strength = 0;
+      if (password.length >= 10) strength++;
+      if (/[a-z]/.test(password)) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^a-zA-Z0-9]/.test(password)) strength++;
+      
+      // Update strength UI
+      if (strength <= 2) {
+        strengthFill.className = 'strength-weak';
+        strengthText.textContent = 'Weak password - add numbers, uppercase, or special characters';
+        strengthText.style.color = '#dc3545';
+      } else if (strength <= 3) {
+        strengthFill.className = 'strength-medium';
+        strengthText.textContent = 'Medium password - try adding more characters';
+        strengthText.style.color = '#ffc107';
+      } else {
+        strengthFill.className = 'strength-strong';
+        strengthText.textContent = 'Strong password!';
+        strengthText.style.color = '#28a745';
+      }
+      
+      passwordError.style.display = 'none';
+      passwordInput.classList.remove('error');
+      return true;
+    }
+
+    function validateConfirmPassword(password, confirmPassword) {
+      const confirmError = document.getElementById('confirm-password-error');
+      const confirmInput = document.getElementById('confirm-password');
+      
+      if (password !== confirmPassword) {
+        confirmError.textContent = 'Passwords do not match';
+        confirmError.style.display = 'block';
+        confirmInput.classList.add('error');
+        return false;
+      } else {
+        confirmError.style.display = 'none';
+        confirmInput.classList.remove('error');
+        return true;
+      }
+    }
+
+    function validateStaffFields() {
+      const experience = document.getElementById('staff-experience')?.value;
+      const experienceError = document.getElementById('experience-error');
+      const experienceInput = document.getElementById('staff-experience');
+      
+      if (experience && (parseInt(experience) < 0 || parseInt(experience) > 70)) {
+        experienceError.textContent = 'Experience must be between 0 and 70 years';
+        experienceError.style.display = 'block';
+        experienceInput.classList.add('error');
+        return false;
+      } else {
+        experienceError.style.display = 'none';
+        experienceInput.classList.remove('error');
+      }
+      
+      return validatePhone(
+        document.getElementById('staff-emergency-phone')?.value,
+        'emergency-phone-error',
+        'staff-emergency-phone'
+      ) && validateName(document.getElementById('staff-emergency-name')?.value);
+    }
+
+    function validateCertification(file) {
+      const certError = document.getElementById('certification-error');
+      const certInput = document.getElementById('staff-certification');
+      
+      if (!file) {
+        certError.style.display = 'none';
+        certInput.classList.remove('error');
+        return true;
+      }
+      
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      
+      if (!allowedTypes.includes(file.type)) {
+        certError.textContent = 'Only PDF, JPG, JPEG, and PNG files are allowed';
+        certError.style.display = 'block';
+        certInput.classList.add('error');
+        return false;
+      }
+      
+      if (file.size > maxSize) {
+        certError.textContent = 'File size must be less than 5MB';
+        certError.style.display = 'block';
+        certInput.classList.add('error');
+        return false;
+      }
+      
+      certError.style.display = 'none';
+      certInput.classList.remove('error');
+      return true;
+    }
+
+    async function handleRegister(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const phone = document.getElementById('register-phone').value;
+      const password = document.getElementById('register-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      // Validate all fields
+      if (!validateName(name)) return;
+      if (!validateEmail(email)) return;
+      if (!validatePhone(phone)) return;
+      if (!validatePassword(password)) return;
+      if (!validateConfirmPassword(password, confirmPassword)) return;
+      
+      if (selectedRole === 'staff') {
+        if (!validateStaffFields()) return;
+        
+        const certFile = document.getElementById('staff-certification')?.files[0];
+        if (!validateCertification(certFile)) return;
+      }
+
+      let userData = {
+        name,
+        email,
+        phone,
+        role: selectedRole
+      };
+
+      if (selectedRole === 'client') {
+        userData = {
+          ...userData,
+          preferredContactMethod: document.getElementById('client-contact-method')?.value || 'email',
+          dateOfBirth: document.getElementById('client-dob')?.value || null
+        };
+      } else {
+        // Validate all staff required fields
+        const address = document.getElementById('staff-address')?.value;
+        const dob = document.getElementById('staff-dob')?.value;
+        const experience = document.getElementById('staff-experience')?.value;
+        const areas = document.getElementById('staff-areas')?.value;
+        const emergencyName = document.getElementById('staff-emergency-name')?.value;
+        const emergencyPhone = document.getElementById('staff-emergency-phone')?.value;
+        const hasTransport = document.querySelector('input[name="staff-transport"]:checked');
+        const hasEquipment = document.querySelector('input[name="staff-equipment"]:checked');
+
+        if (!address || !dob || !areas || !emergencyName || !emergencyPhone || !hasTransport || !hasEquipment) {
+          alert("Please fill in all the required staff fields!");
+          return;
+        }
+
+        userData = {
+          ...userData,
+          address: address,
+          dateOfBirth: dob,
+          yearsOfExperience: parseInt(experience || '0', 10) || 0,
+          areasToWork: areas,
+          emergencyContactName: emergencyName,
+          emergencyContactPhone: emergencyPhone,
+          hasTransportation: hasTransport.value === 'yes',
+          hasEquipment: hasEquipment.value === 'yes'
+        };
+      }
+
+      try {
+        const user = await db.registerWithEmail(email, password);
+        
+        // Save user data to Firestore
+        const userProfile = {
+          ...userData,
+          approved: selectedRole === 'client', // auto-approve clients
+          emailVerified: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        await db.updateUser(user.uid, userProfile);
+        
+        alert(`Account created successfully! Please check your email to verify your account.`);
+        
+        if (selectedRole === 'staff') {
+          alert("After admin approval, you'll be able to login.");
+        }
+
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error("Registration error:", error);
+        alert("Registration failed: " + (error.message || 'Please try again.'));
+      }
+    }
+
+    // Add real-time validation
+    document.getElementById('register-name').addEventListener('blur', () => {
+      validateName(document.getElementById('register-name').value);
+    });
+    document.getElementById('register-email').addEventListener('blur', () => {
+      validateEmail(document.getElementById('register-email').value);
+    });
+    document.getElementById('register-phone').addEventListener('blur', () => {
+      validatePhone(document.getElementById('register-phone').value);
+    });
+    document.getElementById('register-password').addEventListener('input', () => {
+      validatePassword(document.getElementById('register-password').value);
+      validateConfirmPassword(
+        document.getElementById('register-password').value,
+        document.getElementById('confirm-password').value
+      );
+    });
+    document.getElementById('confirm-password').addEventListener('input', () => {
+      validateConfirmPassword(
+        document.getElementById('register-password').value,
+        document.getElementById('confirm-password').value
+      );
+    });
+    document.getElementById('staff-emergency-phone').addEventListener('blur', () => {
+      validatePhone(
+        document.getElementById('staff-emergency-phone')?.value,
+        'emergency-phone-error',
+        'staff-emergency-phone'
+      );
+    });
+    document.getElementById('staff-emergency-name').addEventListener('blur', () => {
+      validateName(document.getElementById('staff-emergency-name')?.value);
+    });
+    document.getElementById('staff-experience').addEventListener('input', () => {
+      validateStaffFields();
+    });
+    document.getElementById('staff-certification').addEventListener('change', (e) => {
+      validateCertification(e.target.files[0]);
+    });
+
+    window.selectRole = selectRole;
+    window.togglePassword = togglePassword;
+    window.handleRegister = handleRegister;
+  </script>
+</body>
+</html>

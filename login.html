@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | SparkMate</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    .auth-container {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .auth-card {
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+    }
+    .auth-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .auth-logo {
+      flex: 0 0 auto;
+    }
+    .auth-logo img {
+      height: 50px;
+      border-radius: 8px;
+    }
+    .auth-header h2 {
+      flex: 1;
+      margin: 0;
+      color: var(--primary-navy);
+      font-size: 1.5rem;
+      text-align: center;
+      transform: translateX(-25px);
+    }
+    [data-theme="dark"] .auth-header h2 {
+      color: var(--spark-cyan);
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--text-secondary);
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .auth-footer a {
+      color: var(--spark-blue);
+      font-weight: 600;
+    }
+    .password-container {
+      position: relative;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .error-message {
+      color: #dc3545;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+    input.error {
+      border-color: #dc3545;
+    }
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .remember-me input[type="checkbox"] {
+      accent-color: var(--spark-blue);
+      outline: none;
+      box-shadow: none;
+    }
+    .remember-me input[type="checkbox"]:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    .forgot-password {
+      display: block;
+      text-align: right;
+      font-size: 0.9rem;
+      color: var(--spark-blue);
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      cursor: pointer;
+    }
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">
+            <img src="assets/logo.jpg" alt="SparkMate Logo">
+          </div>
+          <h2>Sign In</h2>
+        </div>
+        
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div style="margin-bottom: 1.25rem;">
+            <label for="login-email" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Email Address</label>
+            <input type="email" id="login-email" placeholder="you@gmail.com" required>
+            <div id="login-email-error" class="error-message" style="display: none;"></div>
+          </div>
+          <div style="margin-bottom: 0.25rem;">
+            <label for="login-password" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Password</label>
+            <div class="password-container">
+              <input type="password" id="login-password" placeholder="••••••••" required minlength="7">
+              <span class="password-toggle" onclick="toggleLoginPassword()">
+                <i id="login-password-eye" class="fa-solid fa-eye-slash"></i>
+              </span>
+            </div>
+            <div id="login-password-error" class="error-message" style="display: none;"></div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
+            <div class="remember-me" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="remember-me" style="margin: 0;">
+              <label for="remember-me" style="cursor: pointer; margin: 0;">Remember me</label>
+            </div>
+            <span class="forgot-password" onclick="handleForgotPassword()" style="margin: 0;">Forgot password?</span>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
+          </button>
+        </form>
+        
+        <div class="divider">or</div>
+        
+        <button onclick="handleGoogleLogin()" class="btn btn-secondary" style="width: 100%;">
+          <i class="fab fa-google" style="color: #ea4335;"></i> Continue with Google
+        </button>
+        
+        <div class="auth-footer">
+          Don't have an account? <a href="register.html">Sign Up</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+  <script type="module">
+    import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // Load remembered email
+    document.addEventListener('DOMContentLoaded', () => {
+      const rememberedEmail = localStorage.getItem('sparkmate_remembered_email');
+      if (rememberedEmail) {
+        document.getElementById('login-email').value = rememberedEmail;
+        document.getElementById('remember-me').checked = true;
+      }
+    });
+
+    function toggleLoginPassword() {
+      const passwordInput = document.getElementById('login-password');
+      const passwordEye = document.getElementById('login-password-eye');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordEye.classList.remove('fa-eye-slash');
+        passwordEye.classList.add('fa-eye');
+      } else {
+        passwordInput.type = 'password';
+        passwordEye.classList.remove('fa-eye');
+        passwordEye.classList.add('fa-eye-slash');
+      }
+    }
+
+    function validateLoginEmail(email) {
+      const emailError = document.getElementById('login-email-error');
+      const emailInput = document.getElementById('login-email');
+      
+      if (!email.endsWith('@gmail.com')) {
+        emailError.textContent = 'Email must end with @gmail.com';
+        emailError.style.display = 'block';
+        emailInput.classList.add('error');
+        return false;
+      } else {
+        emailError.style.display = 'none';
+        emailInput.classList.remove('error');
+        return true;
+      }
+    }
+
+    function validateLoginPassword(password) {
+      const passwordError = document.getElementById('login-password-error');
+      const passwordInput = document.getElementById('login-password');
+      
+      if (password.length < 7) {
+        passwordError.textContent = 'Password must be more than 6 characters';
+        passwordError.style.display = 'block';
+        passwordInput.classList.add('error');
+        return false;
+      } else {
+        passwordError.style.display = 'none';
+        passwordInput.classList.remove('error');
+        return true;
+      }
+    }
+
+    async function handleForgotPassword() {
+      const email = document.getElementById('login-email').value;
+      
+      if (!email) {
+        alert('Please enter your email address first');
+        return;
+      }
+      
+      if (!validateLoginEmail(email)) {
+        return;
+      }
+      
+      try {
+        await sendPasswordResetEmail(window.auth, email);
+        alert(`Password reset email sent to ${email}!\nPlease check your inbox and spam folder.`);
+      } catch (error) {
+        console.error('Password reset error:', error);
+        let errorMessage = 'Failed to send password reset email';
+        
+        if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Invalid email address';
+        } else if (error.code === 'auth/user-not-found') {
+          errorMessage = 'No account found with this email';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = 'Too many requests. Please try again later';
+        }
+        
+        alert(`${errorMessage}: ${error.message}`);
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const rememberMe = document.getElementById('remember-me').checked;
+
+      // Validate fields
+      if (!validateLoginEmail(email)) return;
+      if (!validateLoginPassword(password)) return;
+
+      // Handle remember me
+      if (rememberMe) {
+        localStorage.setItem('sparkmate_remembered_email', email);
+      } else {
+        localStorage.removeItem('sparkmate_remembered_email');
+      }
+
+      try {
+        const user = await db.loginWithEmail(email, password);
+        
+        // Check email verification
+        if (!user.emailVerified) {
+          alert("Please verify your email address first! Check your inbox for the verification link.\nIf you didn't receive it, please try registering again.");
+          return;
+        }
+        
+        // Get user data
+        const users = await db.get('users') || [];
+        const userData = users.find(u => u.uid === user.uid);
+        
+        if (!userData) {
+          alert('User data not found. Please register first!');
+          return;
+        }
+        
+        // Check if staff is approved
+        if (userData.role === 'staff' && !userData.approved) {
+          alert("Your staff account is pending admin approval. Please wait for admin approval.");
+          return;
+        }
+
+        // Update emailVerified in user profile if needed
+        if (!userData.emailVerified) {
+          await db.updateUser(user.uid, { emailVerified: true });
+        }
+
+        // Login successful - set role and redirect
+        localStorage.setItem('sparkmate_role', userData.role);
+        localStorage.setItem('sparkmate_uid', user.uid);
+        
+        // Redirect based on role
+        if (userData.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else if (userData.role === 'staff') {
+          window.location.href = 'staff.html';
+        } else {
+          window.location.href = 'client.html';
+        }
+
+      } catch (error) {
+        console.error("Login error:", error);
+        let errorMessage = "Login failed";
+        
+        if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Invalid email address';
+        } else if (error.code === 'auth/user-not-found') {
+          errorMessage = 'No account found with this email';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Incorrect password';
+        } else if (error.code === 'auth/user-disabled') {
+          errorMessage = 'This account has been disabled';
+        }
+        
+        alert(`${errorMessage}: ${error.message}`);
+      }
+    }
+
+    async function handleGoogleLogin() {
+      try {
+        const user = await db.loginWithGoogle();
+        
+        // Google login usually means email is already verified
+        if (!user.emailVerified) {
+          alert("Please verify your Google account email first!");
+          return;
+        }
+        
+        const users = await db.get('users') || [];
+        let userData = users.find(u => u.uid === user.uid);
+        
+        // If user doesn't exist, create a new client user
+        if (!userData) {
+          userData = {
+            name: user.displayName || '',
+            email: user.email,
+            phone: user.phoneNumber || '',
+            role: 'client',
+            approved: true,
+            emailVerified: user.emailVerified || true,
+            createdAt: new Date().toISOString()
+          };
+          await db.updateUser(user.uid, userData);
+        }
+        
+        // Check if staff is approved
+        if (userData.role === 'staff' && !userData.approved) {
+          alert("Your staff account is pending admin approval. Please wait for admin approval.");
+          return;
+        }
+
+        // Update emailVerified in user profile
+        if (!userData.emailVerified) {
+          await db.updateUser(user.uid, { emailVerified: true });
+        }
+
+        localStorage.setItem('sparkmate_role', userData.role);
+        localStorage.setItem('sparkmate_uid', user.uid);
+        
+        // Redirect based on role
+        if (userData.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else if (userData.role === 'staff') {
+          window.location.href = 'staff.html';
+        } else {
+          window.location.href = 'client.html';
+        }
+        
+      } catch (error) {
+        console.error("Google login error:", error);
+        alert("Google login failed: " + (error.message || 'Please try again.'));
+      }
+    }
+
+    // Add real-time validation
+    document.getElementById('login-email').addEventListener('blur', () => {
+      validateLoginEmail(document.getElementById('login-email').value);
+    });
+    document.getElementById('login-password').addEventListener('blur', () => {
+      validateLoginPassword(document.getElementById('login-password').value);
+    });
+
+    // Expose functions globally
+    window.handleLogin = handleLogin;
+    window.handleGoogleLogin = handleGoogleLogin;
+    window.toggleLoginPassword = toggleLoginPassword;
+    window.handleForgotPassword = handleForgotPassword;
+  </script>
+</body>
+</html>
