@@ -1,23 +1,56 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Button from '../../components/common/Button'
+import BookingForm from '../../components/client/BookingForm'
 import { useAuth } from '../../context/AuthContext'
+import { useBookings } from '../../hooks/useBookings'
+import Bookings from './Bookings'
 
 export default function ClientDashboard() {
   const [activeView, setActiveView] = useState('overview')
+  const [showForm, setShowForm] = useState(false)
   const { logout, user } = useAuth()
   const navigate = useNavigate()
+  const { bookings, refetch } = useBookings()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/')
   }
 
+  const handleBookingCreated = () => {
+    setShowForm(false)
+    refetch()
+  }
+
+  // Calculate stats from real bookings
+  const completedBookings = bookings.filter(b => b.status === 'completed')
+  const totalCleans = completedBookings.length
+  const totalSpent = completedBookings.reduce((sum, b) => sum + b.price, 0)
+
+  // Find next upcoming booking (not cancelled, not completed)
+  const now = new Date()
+  const upcomingBookings = bookings
+    .filter(b => !['completed', 'cancelled'].includes(b.status))
+    .filter(b => new Date(b.date) >= now)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+  const nextBooking = upcomingBookings[0]
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+  }
+
   const stats = [
-    { label: 'Total Cleans', value: '1', icon: 'fa-sparkles', color: 'bg-blue-500' },
-    { label: 'Loyalty Points', value: '340', icon: 'fa-award', color: 'bg-green-500' },
+    { label: 'Total Cleans', value: totalCleans, icon: 'fa-sparkles', color: 'bg-blue-500' },
+    { label: 'Loyalty Points', value: totalCleans * 100, icon: 'fa-award', color: 'bg-green-500' },
     { label: 'Invited Friends', value: '0', icon: 'fa-percent', color: 'bg-yellow-500' },
-    { label: 'Registered Sites', value: '2', icon: 'fa-building', color: 'bg-purple-500' },
+    { label: 'Total Spent', value: `$${totalSpent.toFixed(2)}`, icon: 'fa-dollar-sign', color: 'bg-purple-500' },
   ]
 
   return (
@@ -49,7 +82,7 @@ export default function ClientDashboard() {
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <i className={`fa-solid ${item.icon}`} />
+                <i className={`fa-solid ${item.icon}`}></i>
                 {item.label}
               </button>
             ))}
@@ -78,7 +111,7 @@ export default function ClientDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Client Dashboard</h1>
             <p className="text-gray-600">Welcome back, {user?.name}</p>
           </div>
-          <Button>
+          <Button onClick={() => setShowForm(true)}>
             <i className="fa-solid fa-plus mr-2" /> New Booking
           </Button>
         </div>
@@ -91,7 +124,7 @@ export default function ClientDashboard() {
                 <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border">
                   <div className="flex items-center gap-4">
                     <div className={`${stat.color} w-12 h-12 rounded-lg flex items-center justify-center text-white`}>
-                      <i className={`fa-solid ${stat.icon} text-xl`} />
+                      <i className={`fa-solid ${stat.icon} text-xl`}></i>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">{stat.label}</p>
@@ -107,7 +140,18 @@ export default function ClientDashboard() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-4">
                   <i className="fa-solid fa-clock text-blue-600 mr-2" /> Next Cleaning Job
                 </h2>
-                <div className="text-gray-500">No upcoming jobs scheduled</div>
+                {nextBooking ? (
+                  <div className="space-y-2">
+                    <p className="font-medium text-gray-900">{formatDate(nextBooking.date)}</p>
+                    <p className="text-gray-600">{nextBooking.time}</p>
+                    <p className="text-gray-600">{nextBooking.address}</p>
+                    <p className="text-sm text-gray-500">
+                      {nextBooking.duration} hours · {nextBooking.type.replace('-', ' ')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-gray-500">No upcoming jobs scheduled</div>
+                )}
               </div>
 
               <div className="bg-white p-6 rounded-xl shadow-sm border">
@@ -131,7 +175,7 @@ export default function ClientDashboard() {
                   </h3>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Current Month Spend:</span>
-                    <strong className="text-gray-900">$180.00</strong>
+                    <strong className="text-gray-900">${totalSpent.toFixed(2)}</strong>
                   </div>
                 </div>
               </div>
@@ -139,7 +183,9 @@ export default function ClientDashboard() {
           </div>
         )}
 
-        {activeView !== 'overview' && (
+        {activeView === 'bookings' && <Bookings />}
+
+        {activeView !== 'overview' && activeView !== 'bookings' && (
           <div className="bg-white p-8 rounded-xl shadow-sm border text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               {activeView.charAt(0).toUpperCase() + activeView.slice(1)} View
@@ -148,6 +194,13 @@ export default function ClientDashboard() {
           </div>
         )}
       </main>
+
+      {showForm && (
+        <BookingForm 
+          onSuccess={handleBookingCreated} 
+          onClose={() => setShowForm(false)} 
+        />
+      )}
     </div>
   )
 }

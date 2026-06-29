@@ -15,8 +15,9 @@ export function AuthProvider({ children }) {
       if (firebaseUser) {
         try {
           const response = await getMe()
-          setUser(response.data.data.user)
-          setRole(response.data.data.user.role)
+          const dbUser = response.data.data.user
+          setUser(dbUser)
+          setRole(dbUser.role)
         } catch (error) {
           console.error('Error fetching user:', error)
           setUser(null)

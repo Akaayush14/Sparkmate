@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth'
+import { auth } from '../../config/firebase'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 
@@ -10,27 +12,44 @@ export default function Register() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [role, setRole] = useState('client')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Mock registration
-    alert('Account created! Please check your email to verify.')
-    navigate('/verify-email')
+    setError('')
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      await updateProfile(userCredential.user, { displayName: name })
+      await sendEmailVerification(userCredential.user)
+      navigate('/verify-email')
+    } catch (error) {
+      console.error('Registration failed:', error)
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-              S
-            </div>
-            <span className="text-xl font-bold text-gray-900">SparkMate</span>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+            S
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
+          <span className="text-xl font-bold text-gray-900">SparkMate</span>
         </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Create your account</h2>
 
         {/* Role toggle */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -96,6 +115,7 @@ export default function Register() {
             placeholder="••••••••"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            error={error}
             required
           />
           
@@ -125,8 +145,12 @@ export default function Register() {
             </div>
           )}
 
-          <Button type="submit" className="w-full">
-            <i className="fa-solid fa-user-plus mr-2" /> Create Account
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Creating account...' : (
+              <>
+                <i className="fa-solid fa-user-plus mr-2" /> Create Account
+              </>
+            )}
           </Button>
         </form>
 

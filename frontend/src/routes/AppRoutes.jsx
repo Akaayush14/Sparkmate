@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Home from '../pages/Home'
 import Login from '../pages/auth/Login'
@@ -30,39 +30,49 @@ function ProtectedRoute({ children, requiredRole }) {
 }
 
 function AppRoutes() {
+  const { user, role, loading } = useAuth()
+
+  // If user is already authenticated and on auth pages, redirect to dashboard
+  if (!loading && user) {
+    const currentPath = window.location.pathname
+    if (['/login', '/register', '/verify-email', '/forgot-password', '/'].includes(currentPath)) {
+      if (role === 'admin') return <Navigate to="/admin" replace />
+      if (role === 'staff') return <Navigate to="/staff" replace />
+      return <Navigate to="/client" replace />
+    }
+  }
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/client"
-          element={
-            <ProtectedRoute requiredRole="client">
-              <ClientDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/staff"
-          element={
-            <ProtectedRoute requiredRole="staff">
-              <StaffDashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client"
+        element={
+          <ProtectedRoute requiredRole="client">
+            <ClientDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff"
+        element={
+          <ProtectedRoute requiredRole="staff">
+            <StaffDashboard />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   )
 }
 

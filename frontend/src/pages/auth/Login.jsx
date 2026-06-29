@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../../config/firebase'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 import { useAuth } from '../../context/AuthContext'
@@ -8,32 +10,20 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const [error, setError] = useState('')
+  const { loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
+    
     try {
-      // Mock login - replace with actual API call later
-      const mockUser = {
-        id: 1,
-        email: email,
-        role: email.includes('admin') ? 'admin' : email.includes('staff') ? 'staff' : 'client',
-        name: email.split('@')[0],
-      }
-      login(mockUser, 'mock-token-123')
-      
-      // Redirect based on role
-      if (mockUser.role === 'admin') {
-        navigate('/admin')
-      } else if (mockUser.role === 'staff') {
-        navigate('/staff')
-      } else {
-        navigate('/client')
-      }
+      await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
       console.error('Login failed:', error)
+      setError(error.message)
     } finally {
       setLoading(false)
     }
@@ -42,15 +32,13 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-              S
-            </div>
-            <span className="text-xl font-bold text-gray-900">SparkMate</span>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+            S
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Sign In</h2>
+          <span className="text-xl font-bold text-gray-900">SparkMate</span>
         </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Sign In</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
@@ -67,6 +55,7 @@ export default function Login() {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={error}
             required
           />
           <div className="flex items-center justify-between">
@@ -83,8 +72,8 @@ export default function Login() {
               Forgot password?
             </Link>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : (
+          <Button type="submit" className="w-full" disabled={loading || authLoading}>
+            {loading || authLoading ? 'Signing in...' : (
               <>
                 <i className="fa-solid fa-right-to-bracket mr-2" /> Sign In
               </>
@@ -99,16 +88,6 @@ export default function Login() {
               Sign Up
             </Link>
           </p>
-        </div>
-
-        {/* Demo accounts */}
-        <div className="mt-8 bg-gray-50 p-4 rounded-lg">
-          <p className="text-sm text-gray-600 mb-3 font-medium">Demo Accounts:</p>
-          <div className="space-y-2 text-xs">
-            <p><strong>Admin:</strong> admin@sparkmate.com (any password)</p>
-            <p><strong>Client:</strong> client@sparkmate.com (any password)</p>
-            <p><strong>Staff:</strong> staff@sparkmate.com (any password)</p>
-          </div>
         </div>
       </div>
     </div>
