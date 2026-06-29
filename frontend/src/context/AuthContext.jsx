@@ -1,38 +1,48 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { auth } from '../config/firebase'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { getMe } from '../services/api'
 
 const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [role, setRole] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is logged in on app load
-    const token = localStorage.getItem('token')
-    const savedUser = localStorage.getItem('user')
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser))
-    }
-    setLoading(false)
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const response = await getMe()
+          setUser(response.data.data.user)
+          setRole(response.data.data.user.role)
+        } catch (error) {
+          console.error('Error fetching user:', error)
+          setUser(null)
+          setRole(null)
+        }
+      } else {
+        setUser(null)
+        setRole(null)
+      }
+      setLoading(false)
+    })
+
+    return unsubscribe
   }, [])
 
-  const login = (userData, token) => {
-    localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(userData))
-    setUser(userData)
-  }
-
-  const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+  const logout = async () => {
+    await signOut(auth)
     setUser(null)
+    setRole(null)
   }
 
   const value = {
     user,
-    login,
-    logout,
+    role,
     loading,
+    logout
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
